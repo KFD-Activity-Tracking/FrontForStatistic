@@ -1,16 +1,45 @@
-# React + Vite
+# FrontForStatistic
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Admin panel for the KFD Activity Tracker — view user activity statistics.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Vite + React (JSX)
+- Plain CSS, no UI libraries
+- Fetch API for HTTP requests
 
-## React Compiler
+## Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+npm run dev   # Dev server on http://localhost:5173
+```
 
-## Expanding the ESLint configuration
+The server must be running on port 8765. Vite proxies `/api` and `/auth` to it automatically.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Pages
+
+- **Login** — authenticates via `POST /auth/login`, saves JWT to `localStorage`
+- **Users** — lists all users from `GET /api/users/all`
+- **User Detail** — shows statistics and actions for a selected user (tabs)
+
+## Project Structure
+
+```
+src/
+  App.jsx           # Root: page state, userId state, navigation logic
+  LoginPage.jsx     # Login form
+  UsersPage.jsx     # User list
+  UserDetailPage.jsx # User detail with tabs (Statistics / Actions)
+```
+
+## API
+
+All requests require `Authorization: Bearer <token>` header (except login).
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /auth/login | Login, returns JWT |
+| GET | /api/users/all | List all users |
+| GET | /api/actions/from/{userId} | User's actions |
+| GET | /api/statistics/from/{userId} | User's statistics |
