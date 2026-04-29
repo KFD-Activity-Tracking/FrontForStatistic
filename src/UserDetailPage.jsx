@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react"
 
-function UserDetailPage({userId}){
+function UserDetailPage({userId, onBack}){
     const[actions, setActions] = useState([])
     const[statistics, setStatistics] = useState([])
     const[tab, setTab] = useState('statistics')
@@ -48,6 +48,7 @@ function UserDetailPage({userId}){
                     ))}
                 </div>
             )}
+            <button onClick={onBack}>Назад</button>
         </div>
     )
 }

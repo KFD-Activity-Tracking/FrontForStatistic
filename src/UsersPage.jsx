@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-function UserPage({onUser}){
+function UserPage({onUser, onLogout}){
     const [users, setUsers] = useState([])
 
     useEffect(() => {
@@ -22,6 +22,7 @@ function UserPage({onUser}){
                     {user.username}
                 </button>
             ))}
+            <button onClick={onLogout}>Выйти</button>
         </div>
     )
 }
