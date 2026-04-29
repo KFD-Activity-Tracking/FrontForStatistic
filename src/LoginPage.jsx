@@ -4,6 +4,7 @@ function LoginPage({onLogin}){
 
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
+    const [error, setError] = useState("")
     
     async function handleLogin(){
         const response = await fetch("/auth/login", {
@@ -12,6 +13,10 @@ function LoginPage({onLogin}){
             body: JSON.stringify({username, password})
         })
         const data = await response.json()
+        if (!response.ok || !data.token){
+            setError("Неверный логин/пароль")
+            return 
+        }
         localStorage.setItem('token', data.token)
         onLogin()
     }
@@ -25,6 +30,7 @@ function LoginPage({onLogin}){
                 placeholder="Введите password" type='password' value={password} onChange={(e) => setPassword(e.target.value)}
             />
             <button onClick={handleLogin}>Войти</button>
+            {error && <div>{error}</div>}
         </div>
     )
 }
