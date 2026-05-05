@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-function LoginPage({onLogin}){
+function LoginPage({ onLogin, onToggleTheme, theme }) {
 
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
@@ -22,15 +22,21 @@ function LoginPage({onLogin}){
     }
 
     return(
-        <div>
-            <input
-                placeholder="Введите login" value={username} onChange={(e) => setUsername(e.target.value)}
-            />
-            <input
-                placeholder="Введите password" type='password' value={password} onChange={(e) => setPassword(e.target.value)}
-            />
-            <button onClick={handleLogin}>Войти</button>
-            {error && <div>{error}</div>}
+        <div className="login-wrapper">
+            <button className="theme-toggle" onClick={onToggleTheme} title="Сменить тему">
+                {theme === 'dark' ? '☀' : '☾'}
+            </button>
+            <div className="login-card">
+                <h2>Вход</h2>
+                <input
+                    placeholder="Логин" value={username} onChange={(e) => setUsername(e.target.value)}
+                />
+                <input
+                    placeholder="Пароль" type='password' value={password} onChange={(e) => setPassword(e.target.value)}
+                />
+                <button onClick={handleLogin}>Войти</button>
+                {error && <div className="error-msg">{error}</div>}
+            </div>
         </div>
     )
 }
