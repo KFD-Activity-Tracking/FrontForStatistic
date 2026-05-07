@@ -1,21 +1,25 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import logoUrl from './assets/logo.svg'
 import LoginPage from './LoginPage'
 import UsersPage from './UsersPage'
 import UserStatsListPage from './UserStatsListPage'
 import UserDetailPage from './UserDetailPage'
 
-function Navbar({ page, onBack, onLogout, onToggleTheme, theme }) {
+function Navbar({ page, onBack, onLogout, theme, onToggleTheme }) {
     const showBack = page === 'user-detail' || page === 'user-stats-list'
     return (
         <nav className="navbar">
             <div className="navbar-left">
+                <img src={logoUrl} alt="KFD" className="navbar-logo" />
                 <span className="navbar-brand">KFD Tracker</span>
-                {showBack && <button className="btn-nav" onClick={onBack}>← Назад</button>}
+                {showBack && (
+                    <button className="btn-secondary" onClick={onBack}>← Назад</button>
+                )}
             </div>
             <div className="navbar-right">
                 {page !== 'login' && (
-                    <button className="btn-nav btn-nav-logout" onClick={onLogout}>Выйти</button>
+                    <button className="btn-logout" onClick={onLogout}>Выйти</button>
                 )}
                 <button className="theme-toggle" onClick={onToggleTheme} title="Сменить тему">
                     {theme === 'dark' ? '☀' : '☾'}
@@ -36,6 +40,14 @@ function App() {
         localStorage.setItem('theme', theme)
     }, [theme])
 
+    useEffect(() => {
+        const token = localStorage.getItem('token')
+        if (!token) return
+        fetch('/api/users/all', { headers: { 'Authorization': 'Bearer ' + token } })
+            .then(res => { if (res.ok) setPage('users'); else localStorage.removeItem('token') })
+            .catch(() => localStorage.removeItem('token'))
+    }, [])
+
     const toggleTheme  = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
     const handleLogout = () => { localStorage.removeItem('token'); setPage('login') }
 
@@ -50,8 +62,8 @@ function App() {
                 page={page}
                 onBack={handleBack}
                 onLogout={handleLogout}
-                onToggleTheme={toggleTheme}
                 theme={theme}
+                onToggleTheme={toggleTheme}
             />
             <div className="app-root">
                 {page === 'login' && (
