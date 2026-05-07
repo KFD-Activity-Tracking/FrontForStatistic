@@ -661,6 +661,18 @@ button:active { transform: scale(0.97); }
 .stat-anomaly { color: #f59e0b; font-weight: 600; font-size: 12px; }
 .stat-ok      { color: var(--green); font-size: 12px; }
 
+.stat-list-card-archived {
+    opacity: 0.65;
+    border-style: dashed;
+}
+.stat-list-card-archived:hover { opacity: 1; }
+
+.btn-archive-active {
+    background: var(--card-hover);
+    color: var(--text);
+    border-color: var(--border-bright);
+}
+
 /* ── System resources ── */
 .resources-section {
     margin-top: 20px;
