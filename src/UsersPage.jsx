@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react"
 
-function UserPage({ onUser, onLogout }) {
-    const [users, setUsers] = useState([])
+const ROLE_LABEL = { USER: 'Сотрудник', MANAGER: 'Менеджер', ADMIN: 'Администратор' }
+
+function UserPage({ onUser }) {
+    const [users, setUsers]     = useState([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -20,18 +22,23 @@ function UserPage({ onUser, onLogout }) {
 
     return (
         <div className="page">
-            <div className="page-header">
-                <h2>Пользователи</h2>
-                <button className="btn-secondary" onClick={onLogout}>Выйти</button>
+            <div className="page-hero">
+                <h1 className="page-hero-title">Пользователи</h1>
+                <p className="page-hero-sub">Выберите сотрудника для просмотра статистики активности</p>
             </div>
 
             {loading && <div className="loading">Загрузка...</div>}
 
             <div className="users-list">
                 {!loading && users.map(user => (
-                    <div key={user.id} className="user-card" onClick={() => onUser(user.id)}>
-                        <div className="user-name">{user.realName || user.username}</div>
-                        <div className="user-login">@{user.username}</div>
+                    <div key={user.id} className="user-card" onClick={() => onUser(user)}>
+                        <div className="user-brief">
+                            <span className="user-login-brief">@{user.username}</span>
+                            <span className={`user-role-badge role-${user.role?.toLowerCase()}`}>
+                                {ROLE_LABEL[user.role] ?? user.role}
+                            </span>
+                        </div>
+                        <span className="user-arrow">→</span>
                     </div>
                 ))}
             </div>

@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react"
 
-// Thermal color map: dark navy → blue → yellow → red (no green/cyan)
 const COLOR_STOPS = [
-    { t: 0.00, r:   0, g:   0, b:  60 },
-    { t: 0.40, r:   0, g:  30, b: 255 },
-    { t: 0.70, r: 255, g: 200, b:   0 },
-    { t: 1.00, r: 255, g:   0, b:   0 },
+    { t: 0.00, r:   0, g:   0, b:   4 },
+    { t: 0.30, r:  10, g:  15, b: 120 },
+    { t: 0.58, r:  90, g:  20, b: 180 },
+    { t: 0.80, r: 249, g: 142, b:   9 },
+    { t: 1.00, r: 252, g: 255, b: 164 },
 ]
 
 function thermalColor(t) {
@@ -23,37 +23,37 @@ function thermalColor(t) {
     return [255, 0, 0]
 }
 
-function drawHeatMap(canvas, heatMap, width) {
-    const height = Math.floor(heatMap.length / width)
-    const scale  = 5
-    const W      = width  * scale
-    const H      = height * scale
-    const radius = scale * 3.5
+// W, H — размер выходного канваса в пикселях
+// Блобы всегда круглые: радиус считается в пикселях одинаково по X и Y
+function drawHeatMap(canvas, heatMap, gridW, W, H) {
+    const gridH  = Math.floor(heatMap.length / gridW)
+    const cellW  = W / gridW
+    const cellH  = H / gridH
+    // Радиус блоба — круговой, привязан к меньшей стороне ячейки
+    const radius = Math.min(cellW, cellH) * 3.5
+    const r      = Math.ceil(radius)
 
-    // Accumulate Gaussian-like intensity for each hot cell
     const intensity = new Float32Array(W * H)
 
     for (let i = 0; i < heatMap.length; i++) {
         const v = heatMap.charCodeAt(i) / 255
         if (v === 0) continue
-        const cx = (i % width) * scale + (scale >> 1)
-        const cy = Math.floor(i / width) * scale + (scale >> 1)
-        const r  = Math.ceil(radius)
+        const cx = Math.round((i % gridW) * cellW + cellW / 2)
+        const cy = Math.round(Math.floor(i / gridW) * cellH + cellH / 2)
 
         for (let dy = -r; dy <= r; dy++) {
             for (let dx = -r; dx <= r; dx++) {
                 const px = cx + dx
                 const py = cy + dy
                 if (px < 0 || px >= W || py < 0 || py >= H) continue
+                // dist в пикселях — одинаково по обоим осям → круглые блобы
                 const dist = Math.sqrt(dx * dx + dy * dy)
                 if (dist > radius) continue
-                // Linear falloff from center
                 intensity[py * W + px] += v * (1 - dist / radius)
             }
         }
     }
 
-    // Find max for normalization
     let maxVal = 0
     for (let i = 0; i < intensity.length; i++) {
         if (intensity[i] > maxVal) maxVal = intensity[i]
@@ -67,7 +67,7 @@ function drawHeatMap(canvas, heatMap, width) {
     const data      = imageData.data
 
     for (let i = 0; i < W * H; i++) {
-        const t        = Math.min(1, intensity[i] / maxVal)
+        const t         = Math.min(1, intensity[i] / maxVal)
         const [r, g, b] = thermalColor(t)
         data[i * 4]     = r
         data[i * 4 + 1] = g
@@ -85,12 +85,14 @@ function HeatMap({ heatMap, width }) {
 
     useEffect(() => {
         if (!heatMap || heatMap.length === 0) return
-        drawHeatMap(canvasRef.current, heatMap, width)
+        const scale = 5
+        drawHeatMap(canvasRef.current, heatMap, width, width * scale, Math.floor(heatMap.length / width) * scale)
     }, [heatMap, width])
 
     useEffect(() => {
         if (!expanded || !heatMap || heatMap.length === 0) return
-        drawHeatMap(fullCanvasRef.current, heatMap, width)
+        // Рисуем в точном разрешении экрана — заполняет весь экран без CSS-деформации
+        drawHeatMap(fullCanvasRef.current, heatMap, width, window.screen.width, window.screen.height)
     }, [expanded, heatMap, width])
 
     useEffect(() => {
