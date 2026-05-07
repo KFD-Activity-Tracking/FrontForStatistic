@@ -30,16 +30,42 @@ function fmtNum(n) {
 
 function parseAiEval(text) {
     if (!text || text === 'no evaluation') return null
+    // JSON format (current)
+    try {
+        if (text.trim().startsWith('{')) {
+            const j = JSON.parse(text)
+            return {
+                isAnomalous:       j.is_anomalous       ?? null,
+                fraudProb:         j.fraud_probability  ?? null,
+                confidence:        j.confidence         ?? null,
+                issues:            Array.isArray(j.issues) ? j.issues : [],
+                analysis:          j.analysis           || null,
+                recommendedAction: j.recommended_action || null,
+                modelName:         j.model              || null,
+            }
+        }
+    } catch (e) { void e }
+    // Fallback: regex for old text format
     const anomalyMatch = text.match(/Anomalies?:\s*(true|false)/i)
     const fraudMatch   = text.match(/fraud probability:\s*([\d.]+)/i)
     const issuesMatch  = text.match(/Issues?:\s*(.+)/i)
     const modelMatch   = text.match(/Using\s+(.+?)\s+as model/i)
     return {
-        isAnomalous: anomalyMatch ? anomalyMatch[1].toLowerCase() === 'true' : null,
-        fraudProb:   fraudMatch   ? parseFloat(fraudMatch[1]) : null,
-        issues:      issuesMatch  ? issuesMatch[1].split(',').map(s => s.trim()).filter(Boolean) : [],
-        modelName:   modelMatch   ? modelMatch[1] : null,
+        isAnomalous:       anomalyMatch ? anomalyMatch[1].toLowerCase() === 'true' : null,
+        fraudProb:         fraudMatch   ? parseFloat(fraudMatch[1]) : null,
+        confidence:        null,
+        issues:            issuesMatch  ? issuesMatch[1].split(',').map(s => s.trim()).filter(Boolean) : [],
+        analysis:          null,
+        recommendedAction: null,
+        modelName:         modelMatch   ? modelMatch[1] : null,
     }
+}
+
+const ACTION_LABELS = {
+    none:  { label: 'Норма',           cls: 'ai-badge-ok'     },
+    warn:  { label: 'Внимание',        cls: 'ai-badge-warn'   },
+    flag:  { label: 'Требует проверки',cls: 'ai-badge-flag'   },
+    block: { label: 'Заблокировать',   cls: 'ai-badge-danger' },
 }
 
 function AiEvalSection({ aiEval }) {
@@ -48,9 +74,11 @@ function AiEvalSection({ aiEval }) {
 
     const fraudPct = parsed.fraudProb != null ? Math.round(parsed.fraudProb * 100) : null
     const barColor = fraudPct == null ? 'var(--green)'
-        : fraudPct >= 70 ? 'var(--accent)'
+        : fraudPct >= 70 ? '#f85149'
         : fraudPct >= 40 ? '#e8a94a'
         : 'var(--green)'
+
+    const actionInfo = parsed.recommendedAction ? ACTION_LABELS[parsed.recommendedAction] : null
 
     return (
         <div className="ai-section">
@@ -61,14 +89,20 @@ function AiEvalSection({ aiEval }) {
                         {parsed.isAnomalous ? '⚠ Аномалия' : '✓ Норма'}
                     </span>
                 )}
-                {parsed.modelName && (
+                {actionInfo && parsed.recommendedAction !== 'none' && (
+                    <span className={`ai-badge ${actionInfo.cls}`}>{actionInfo.label}</span>
+                )}
+                {parsed.modelName && parsed.modelName !== 'fallback-rules' && (
                     <span className="ai-model">{parsed.modelName}</span>
                 )}
             </div>
+            {parsed.analysis && (
+                <div className="ai-analysis">{parsed.analysis}</div>
+            )}
             {fraudPct != null && (
                 <div className="ai-fraud-bar">
                     <div className="ai-fraud-label">
-                        <span>Вероятность мошенничества</span>
+                        <span>Вероятность аномалии</span>
                         <span>{fraudPct}%</span>
                     </div>
                     <div className="ai-fraud-track">
@@ -78,7 +112,7 @@ function AiEvalSection({ aiEval }) {
             )}
             {parsed.issues.length > 0 && (
                 <div className="ai-issues">
-                    <div className="ai-issues-label">Проблемы:</div>
+                    <div className="ai-issues-label">Обнаружено:</div>
                     <ul>
                         {parsed.issues.map((issue, i) => <li key={i}>{issue}</li>)}
                     </ul>

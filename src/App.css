@@ -444,8 +444,16 @@ button:active { transform: scale(0.97); }
     padding: 3px 10px;
     border-radius: 20px;
 }
-.ai-badge-ok      { background: rgba(63,185,80,0.12); color: var(--green); border: 1px solid rgba(63,185,80,0.25); }
-.ai-badge-warn    { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }
+.ai-badge-ok      { background: rgba(63,185,80,0.12);  color: var(--green); border: 1px solid rgba(63,185,80,0.25); }
+.ai-badge-warn    { background: rgba(245,158,11,0.12); color: #f59e0b;      border: 1px solid rgba(245,158,11,0.25); }
+.ai-badge-flag    { background: rgba(234,105,44,0.12); color: #ea692c;      border: 1px solid rgba(234,105,44,0.25); }
+.ai-badge-danger  { background: rgba(248,81,73,0.12);  color: #f85149;      border: 1px solid rgba(248,81,73,0.25); }
+.ai-analysis {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
 .ai-fraud-bar {
     display: flex;
     flex-direction: column;
@@ -471,8 +479,15 @@ button:active { transform: scale(0.97); }
     background: var(--accent);
     transition: width 0.4s ease;
 }
+.ai-issues-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+}
 .ai-issues {
-    list-style: none;
     display: flex;
     flex-direction: column;
     gap: 4px;
