@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react"
 import ActivityCalendar from "./ActivityCalendar"
 
-const ROLE_LABEL = { USER: 'Сотрудник', MANAGER: 'Менеджер', ADMIN: 'Администратор' }
-
 function fmt(dt) {
     if (!dt) return '—'
     const d = new Date(dt)
@@ -19,35 +17,37 @@ function isAnomalous(stat) {
     return stat.ai_eval.toLowerCase().includes('true')
 }
 
+const STATUS_LABEL = { ACTIVE: '● активна', COMPLETED: 'завершена', INTERRUPTED: 'прервана' }
+const STATUS_CLASS = { ACTIVE: 'status-active', COMPLETED: 'status-done', INTERRUPTED: 'status-interrupted' }
+
 function UserStatsListPage({ user, onSelectStat }) {
     const [statistics, setStatistics] = useState([])
     const [loading, setLoading]       = useState(true)
+    const [updatedAt, setUpdatedAt]   = useState(null)
 
     useEffect(() => {
         async function load() {
-            setLoading(true)
             const token = localStorage.getItem('token')
             const res   = await fetch(`/api/statistics/from/${user.id}`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             })
             const data = await res.json()
             setStatistics([...data].sort((a, b) => (b.start_time > a.start_time ? 1 : -1)))
+            setUpdatedAt(new Date())
             setLoading(false)
         }
         load()
+        const id = setInterval(load, 30_000)
+        return () => clearInterval(id)
     }, [user.id])
 
     return (
         <div className="page">
-            <div className="page-hero">
-                <h1 className="page-hero-title">{user.realName || user.username}</h1>
-                <div className="user-meta">
-                    <span className="user-meta-item">@{user.username}</span>
-                    <span className="user-meta-sep">·</span>
-                    <span className={`user-role-badge role-${user.role?.toLowerCase()}`}>
-                        {ROLE_LABEL[user.role] ?? user.role}
-                    </span>
-                </div>
+            <div className="page-header">
+                <h2>{user.realName || user.username}</h2>
+                {updatedAt && (
+                    <span className="updated-at">Обновлено: {updatedAt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
+                )}
             </div>
 
             {!loading && (
@@ -75,10 +75,15 @@ function UserStatsListPage({ user, onSelectStat }) {
                                 <span>Клики: <b>{stat.mouse_clicks ?? '—'}</b></span>
                                 <span>Клавиши: <b>{stat.keyboard_clicks ?? '—'}</b></span>
                                 <span>Движение: <b>{stat.mouse_movement ?? '—'}</b></span>
-                                {isAnomalous(stat)
+                                {stat.status && (
+                                    <span className={`session-status ${STATUS_CLASS[stat.status] ?? ''}`}>
+                                        {STATUS_LABEL[stat.status] ?? stat.status}
+                                    </span>
+                                )}
+                                {stat.status !== 'ACTIVE' && (isAnomalous(stat)
                                     ? <span className="stat-anomaly">⚠ аномалия</span>
                                     : <span className="stat-ok">✓ норма</span>
-                                }
+                                )}
                             </div>
                             <span className="user-arrow">→</span>
                         </div>

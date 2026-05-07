@@ -1,4 +1,8 @@
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
+
+const WEEKS = 52
+const GAP   = 2
+const DAY_LABEL_W = 28
 
 const MONTHS = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']
 const DAYS   = ['Пн','','Ср','','Пт','','']
@@ -14,6 +18,19 @@ function getLevel(value, max) {
 
 function ActivityCalendar({ stats }) {
     const [tooltip, setTooltip] = useState(null)
+    const [cellSize, setCellSize] = useState(11)
+    const wrapRef = useRef(null)
+
+    useEffect(() => {
+        if (!wrapRef.current) return
+        const obs = new ResizeObserver(([entry]) => {
+            const w = entry.contentRect.width
+            const size = Math.max(8, Math.floor((w - DAY_LABEL_W - (WEEKS - 1) * GAP) / WEEKS))
+            setCellSize(size)
+        })
+        obs.observe(wrapRef.current)
+        return () => obs.disconnect()
+    }, [])
 
     const activityMap = new Map()
     stats.forEach(s => {
@@ -21,55 +38,54 @@ function ActivityCalendar({ stats }) {
         const day = s.start_time.slice(0, 10)
         activityMap.set(day, (activityMap.get(day) || 0) + (s.mouse_clicks || 0) + (s.keyboard_clicks || 0))
     })
-
     const maxActivity = Math.max(0, ...activityMap.values())
 
-    // Build 52-week grid anchored to today
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    // Find Monday of the week 51 weeks ago
     const startDate = new Date(today)
-    startDate.setDate(startDate.getDate() - 363)
-    const dow = (startDate.getDay() + 6) % 7  // 0=Mon
-    startDate.setDate(startDate.getDate() - dow)
+    const dowToday = (today.getDay() + 6) % 7
+    startDate.setDate(today.getDate() - dowToday - (WEEKS - 1) * 7)
 
     const weeks = []
-    let monthLabels = []
+    const monthLabels = []
     const cur = new Date(startDate)
 
-    for (let w = 0; w < 52; w++) {
+    for (let w = 0; w < WEEKS; w++) {
         const cells = []
         for (let d = 0; d < 7; d++) {
             const dateStr = cur.toISOString().slice(0, 10)
             const activity = activityMap.get(dateStr) || 0
-            const level = getLevel(activity, maxActivity)
             const isFuture = cur > today
-            cells.push({ dateStr, activity, level: isFuture ? -1 : level })
+            cells.push({ dateStr, activity, level: isFuture ? -1 : getLevel(activity, maxActivity) })
             cur.setDate(cur.getDate() + 1)
         }
-        // Month label: show when month changes at start of week
         const weekStart = new Date(cur)
         weekStart.setDate(weekStart.getDate() - 7)
-        const prevWeek = new Date(weekStart)
-        prevWeek.setDate(prevWeek.getDate() - 1)
-        monthLabels.push(
-            weekStart.getMonth() !== prevWeek.getMonth()
-                ? MONTHS[weekStart.getMonth()]
-                : ''
-        )
+        const prevDay = new Date(weekStart)
+        prevDay.setDate(prevDay.getDate() - 1)
+        const isMonthStart = weekStart.getMonth() !== prevDay.getMonth()
+        monthLabels.push(isMonthStart ? MONTHS[weekStart.getMonth()] : '')
         weeks.push(cells)
     }
 
+    const cs = { width: cellSize, height: cellSize }
+
     return (
-        <div className="activity-calendar">
-            <div className="cal-month-row">
+        <div className="activity-calendar" ref={wrapRef}>
+            <div style={{ display: 'flex', marginLeft: DAY_LABEL_W, gap: GAP, marginBottom: 4 }}>
                 {monthLabels.map((m, i) => (
-                    <div key={i} className="cal-month-label">{m}</div>
+                    <div key={i} style={{ width: cellSize + GAP, flexShrink: 0, fontSize: 10, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'visible' }}>
+                        {m}
+                    </div>
                 ))}
             </div>
             <div className="cal-body">
-                <div className="cal-day-labels">
-                    {DAYS.map((d, i) => <div key={i} className="cal-day-label">{d}</div>)}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: GAP, width: DAY_LABEL_W - 4, marginRight: 4, flexShrink: 0 }}>
+                    {DAYS.map((d, i) => (
+                        <div key={i} style={{ height: cellSize, lineHeight: `${cellSize}px`, fontSize: 9, color: 'var(--text-dim)', textAlign: 'right' }}>
+                            {d}
+                        </div>
+                    ))}
                 </div>
                 <div className="cal-grid">
                     {weeks.map((cells, wi) => (
@@ -78,6 +94,7 @@ function ActivityCalendar({ stats }) {
                                 <div
                                     key={di}
                                     className={`cal-cell ${cell.level < 0 ? 'cal-future' : `cal-level-${cell.level}`}`}
+                                    style={cs}
                                     onMouseEnter={e => setTooltip({ ...cell, x: e.clientX, y: e.clientY })}
                                     onMouseLeave={() => setTooltip(null)}
                                 />
@@ -86,9 +103,9 @@ function ActivityCalendar({ stats }) {
                     ))}
                 </div>
             </div>
-            <div className="cal-legend">
+            <div className="cal-legend" style={{ marginLeft: DAY_LABEL_W }}>
                 <span>Меньше</span>
-                {[0,1,2,3,4].map(l => <div key={l} className={`cal-cell cal-level-${l}`} />)}
+                {[0,1,2,3,4].map(l => <div key={l} className={`cal-cell cal-level-${l}`} style={cs} />)}
                 <span>Больше</span>
             </div>
             {tooltip && tooltip.level >= 0 && (
