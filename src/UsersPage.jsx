@@ -150,12 +150,9 @@ function UsersPage({ onUser, currentUser, manager }) {
 
     return (
         <div className="page">
-            <div className="page-header page-header-centered">
-                <div />
+            <div className="page-header">
                 <h2>{title}</h2>
-                <div className="page-header-centered-right">
-                    <button className="btn-primary" onClick={() => setModal(true)}>+ Добавить</button>
-                </div>
+                <button className="btn-primary" onClick={() => setModal(true)}>+ Добавить</button>
             </div>
 
             {loading && <div className="loading">Загрузка...</div>}

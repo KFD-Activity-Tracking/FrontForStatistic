@@ -167,6 +167,7 @@ html, body {
     color: var(--text);
     letter-spacing: -0.3px;
     flex: 1;
+    text-align: left;
 }
 .updated-at {
     font-size: 11px;
@@ -174,25 +175,6 @@ html, body {
     flex-shrink: 0;
 }
 
-.page-header-centered {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
-.page-header-centered h2 {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    flex: none;
-}
-.page-header-centered-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-}
 
 /* ── Buttons ── */
 button {
@@ -422,16 +404,30 @@ button:active { transform: scale(0.97); }
     box-shadow: var(--shadow-md);
 }
 
+.stat-timerange {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.stat-tz {
+    font-size: 11px;
+    color: var(--text-dim);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+}
 .stat-metrics {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     margin-bottom: 20px;
     padding-bottom: 20px;
     border-bottom: 1px solid var(--border);
-}
-@media (max-width: 580px) {
-    .stat-metrics { grid-template-columns: repeat(2, 1fr); }
 }
 .stat-metric {
     background: var(--card);

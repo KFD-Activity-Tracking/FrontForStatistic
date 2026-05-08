@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import logoUrl from './assets/logo.svg'
 import LoginPage from './LoginPage'
@@ -37,6 +37,29 @@ function App() {
     const [theme, setTheme]                 = useState(() => localStorage.getItem('theme') || 'dark')
     const [showArchived, setShowArchived]   = useState(false)
     const [currentUser, setCurrentUser]     = useState(null)
+    const logoutTimerRef                     = useRef(null)
+
+    useEffect(() => {
+        if (page === 'login') { clearTimeout(logoutTimerRef.current); return }
+
+        const reset = () => {
+            clearTimeout(logoutTimerRef.current)
+            logoutTimerRef.current = setTimeout(() => {
+                localStorage.removeItem('token')
+                setCurrentUser(null)
+                setManagerStack([])
+                setPage('login')
+            }, 10 * 60 * 1000)
+        }
+
+        const events = ['mousemove', 'keydown', 'click', 'touchstart']
+        events.forEach(e => window.addEventListener(e, reset, { passive: true }))
+        reset()
+        return () => {
+            events.forEach(e => window.removeEventListener(e, reset))
+            clearTimeout(logoutTimerRef.current)
+        }
+    }, [page])
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme)

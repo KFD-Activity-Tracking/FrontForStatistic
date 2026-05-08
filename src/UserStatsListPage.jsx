@@ -1,14 +1,22 @@
 import { useEffect, useState } from "react"
 import ActivityCalendar from "./ActivityCalendar"
 
+function parseUTC(dt) {
+    if (!dt) return null
+    const s = dt.includes('Z') || dt.includes('+') ? dt : dt + 'Z'
+    return new Date(s)
+}
+
 function fmt(dt) {
-    if (!dt) return '—'
-    return new Date(dt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    const d = parseUTC(dt)
+    if (!d) return '—'
+    return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
 }
 
 function fmtDate(dt) {
-    if (!dt) return '—'
-    return new Date(dt).toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' })
+    const d = parseUTC(dt)
+    if (!d) return '—'
+    return d.toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' })
 }
 
 function isAnomalous(stat) {
@@ -51,16 +59,13 @@ function UserStatsListPage({ user, showArchived, onSelectStat }) {
 
     return (
         <div className="page">
-            <div className="page-header page-header-centered">
-                <div />
+            <div className="page-header">
                 <h2>{user.realName || user.username}</h2>
-                <div className="page-header-centered-right">
-                    {updatedAt && !showArchived && (
-                        <span className="updated-at">
-                            {updatedAt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                    )}
-                </div>
+                {updatedAt && !showArchived && (
+                    <span className="updated-at">
+                        {updatedAt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                )}
             </div>
 
             {!loading && !showArchived && (

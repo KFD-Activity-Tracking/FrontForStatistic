@@ -1,17 +1,22 @@
 import { useState, useEffect, useRef } from "react"
 import HeatMap from "./HeatMap"
 
+function parseUTC(dt) {
+    if (!dt) return null
+    const s = dt.includes('Z') || dt.includes('+') ? dt : dt + 'Z'
+    return new Date(s)
+}
+
 function fmt(dt) {
-    if (!dt) return '—'
-    return new Date(dt).toLocaleString('ru-RU', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-    })
+    const d = parseUTC(dt)
+    if (!d) return '—'
+    return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
 }
 
 function fmtDate(dt) {
-    if (!dt) return '—'
-    return new Date(dt).toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' })
+    const d = parseUTC(dt)
+    if (!d) return '—'
+    return d.toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' })
 }
 
 function fmtDuration(seconds) {
@@ -199,6 +204,10 @@ function UserDetailPage({ stat }) {
         <div className="page">
             <div className="page-header">
                 <h2>Статистика · {fmtDate(stat.start_time)}</h2>
+                <div className="stat-timerange">
+                    {fmt(stat.start_time)} — {fmt(stat.end_time)}
+                    <span className="stat-tz">{Intl.DateTimeFormat().resolvedOptions().timeZone}</span>
+                </div>
             </div>
 
             <div className="stat-card">
@@ -219,15 +228,21 @@ function UserDetailPage({ stat }) {
                         <span className="stat-metric-value">{fmtNum(stat.mouse_movement)}</span>
                         <span className="stat-metric-label">Движение мыши</span>
                     </div>
+                    <div className="stat-metric">
+                        <span className="stat-metric-value">{fmtDuration(stat.idle_time)}</span>
+                        <span className="stat-metric-label">Неактивное время</span>
+                    </div>
+                    <div className="stat-metric">
+                        <span className="stat-metric-value">{stat.keyboard_to_mouse_coef > 0 ? stat.keyboard_to_mouse_coef.toFixed(2) : '—'}</span>
+                        <span className="stat-metric-label">Коэф. клав/мышь</span>
+                    </div>
+                    {stat.number_of_breaks > 0 && (
+                        <div className="stat-metric">
+                            <span className="stat-metric-value">{stat.number_of_breaks}</span>
+                            <span className="stat-metric-label">Перерывы</span>
+                        </div>
+                    )}
                 </div>
-
-                <div className="stat-row"><span>Начало</span><span>{fmt(stat.start_time)}</span></div>
-                <div className="stat-row"><span>Конец</span><span>{fmt(stat.end_time)}</span></div>
-                <div className="stat-row"><span>Неактивное время</span><span>{fmtDuration(stat.idle_time)}</span></div>
-                <div className="stat-row"><span>Коэф. клав/мышь</span><span>{stat.keyboard_to_mouse_coef > 0 ? stat.keyboard_to_mouse_coef.toFixed(2) : '—'}</span></div>
-                {stat.number_of_breaks > 0 && (
-                    <div className="stat-row"><span>Перерывы (&gt;10 мин)</span><span>{stat.number_of_breaks}</span></div>
-                )}
 
                 <SystemResourcesSection
                     cpu={stat.average_cpu}
