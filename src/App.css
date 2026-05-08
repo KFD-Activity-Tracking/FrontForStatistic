@@ -330,6 +330,83 @@ button:active { transform: scale(0.97); }
 .user-name  { font-size: 15px; font-weight: 600; color: var(--text); text-align: left; }
 .user-login { font-size: 12px; color: var(--text-muted); margin-top: 1px; text-align: left; }
 
+/* ── Modal ── */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    backdrop-filter: blur(4px);
+}
+.modal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px 36px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+}
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.modal-field label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.modal-field input,
+.modal-field select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+}
+.modal-field input:focus,
+.modal-field select:focus {
+    border-color: var(--accent);
+}
+.modal-field input::placeholder { color: var(--text-dim); }
+.modal-error {
+    font-size: 13px;
+    color: #ef4444;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 7px;
+    padding: 8px 12px;
+}
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 4px;
+}
+
 /* ── Stat card ── */
 .stat-card {
     background: var(--surface);
