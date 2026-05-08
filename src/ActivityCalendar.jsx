@@ -53,7 +53,7 @@ function ActivityCalendar({ stats }) {
     for (let w = 0; w < WEEKS; w++) {
         const cells = []
         for (let d = 0; d < 7; d++) {
-            const dateStr = cur.toISOString().slice(0, 10)
+            const dateStr = `${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`
             const activity = activityMap.get(dateStr) || 0
             const isFuture = cur > today
             cells.push({ dateStr, activity, level: isFuture ? -1 : getLevel(activity, maxActivity) })
