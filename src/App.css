@@ -158,11 +158,12 @@ html, body {
     align-items: center;
     gap: 16px;
     margin-bottom: 28px;
-    padding-bottom: 20px;
+    padding: 20px 0;
     border-bottom: 1px solid var(--border);
 }
 .page-header h2 {
     font-size: 22px;
+    line-height: 1;
     font-weight: 700;
     color: var(--text);
     letter-spacing: -0.3px;
@@ -407,7 +408,6 @@ button:active { transform: scale(0.97); }
 .stat-timerange {
     font-size: 13px;
     color: var(--text-muted);
-    margin-top: 4px;
     font-variant-numeric: tabular-nums;
     display: flex;
     align-items: center;
