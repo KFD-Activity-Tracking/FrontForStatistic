@@ -59,12 +59,14 @@ function ActivityCalendar({ stats }) {
             cells.push({ dateStr, activity, level: isFuture ? -1 : getLevel(activity, maxActivity) })
             cur.setDate(cur.getDate() + 1)
         }
-        const weekStart = new Date(cur)
-        weekStart.setDate(weekStart.getDate() - 7)
-        const prevDay = new Date(weekStart)
-        prevDay.setDate(prevDay.getDate() - 1)
-        const isMonthStart = weekStart.getMonth() !== prevDay.getMonth()
-        monthLabels.push(isMonthStart ? MONTHS[weekStart.getMonth()] : '')
+        let monthLabel = ''
+        for (const cell of cells) {
+            if (cell.dateStr.slice(8) === '01') {
+                monthLabel = MONTHS[new Date(cell.dateStr + 'T00:00:00').getMonth()]
+                break
+            }
+        }
+        monthLabels.push(monthLabel)
         weeks.push(cells)
     }
 
@@ -74,7 +76,7 @@ function ActivityCalendar({ stats }) {
         <div className="activity-calendar" ref={wrapRef}>
             <div style={{ display: 'flex', marginLeft: DAY_LABEL_W, gap: GAP, marginBottom: 4 }}>
                 {monthLabels.map((m, i) => (
-                    <div key={i} style={{ width: cellSize + GAP, flexShrink: 0, fontSize: 10, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'visible' }}>
+                    <div key={i} style={{ width: cellSize, flexShrink: 0, fontSize: 10, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'visible' }}>
                         {m}
                     </div>
                 ))}

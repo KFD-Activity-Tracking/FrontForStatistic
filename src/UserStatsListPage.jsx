@@ -23,11 +23,10 @@ function isAnomalous(stat) {
 const STATUS_LABEL = { ACTIVE: '● активна', COMPLETED: 'завершена', INTERRUPTED: 'прервана' }
 const STATUS_CLASS = { ACTIVE: 'status-active', COMPLETED: 'status-done', INTERRUPTED: 'status-interrupted' }
 
-function UserStatsListPage({ user, onSelectStat }) {
+function UserStatsListPage({ user, showArchived, onSelectStat }) {
     const [statistics, setStatistics] = useState([])
     const [loading, setLoading]       = useState(true)
     const [updatedAt, setUpdatedAt]   = useState(null)
-    const [showArchived, setShowArchived] = useState(false)
 
     useEffect(() => {
         setLoading(true)
@@ -52,20 +51,15 @@ function UserStatsListPage({ user, onSelectStat }) {
 
     return (
         <div className="page">
-            <div className="page-header">
+            <div className="page-header page-header-centered">
+                <div />
                 <h2>{user.realName || user.username}</h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                <div className="page-header-centered-right">
                     {updatedAt && !showArchived && (
                         <span className="updated-at">
-                            Обновлено: {updatedAt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                            {updatedAt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                     )}
-                    <button
-                        className={`btn-secondary ${showArchived ? 'btn-archive-active' : ''}`}
-                        onClick={() => setShowArchived(v => !v)}
-                    >
-                        {showArchived ? '← Текущие' : '🗄 Архив'}
-                    </button>
                 </div>
             </div>
 

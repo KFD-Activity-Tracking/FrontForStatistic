@@ -30,10 +30,11 @@ function Navbar({ page, onBack, onLogout, theme, onToggleTheme }) {
 }
 
 function App() {
-    const [page, setPage]         = useState('login')
-    const [selectedUser, setUser] = useState(null)
-    const [selectedStat, setStat] = useState(null)
-    const [theme, setTheme]       = useState(() => localStorage.getItem('theme') || 'dark')
+    const [page, setPage]             = useState('login')
+    const [selectedUser, setUser]     = useState(null)
+    const [selectedStat, setStat]     = useState(null)
+    const [theme, setTheme]           = useState(() => localStorage.getItem('theme') || 'dark')
+    const [showArchived, setShowArchived] = useState(false)
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme)
@@ -53,7 +54,7 @@ function App() {
 
     function handleBack() {
         if (page === 'user-detail')     setPage('user-stats-list')
-        if (page === 'user-stats-list') setPage('users')
+        if (page === 'user-stats-list') { setPage('users'); setShowArchived(false) }
     }
 
     return (
@@ -65,16 +66,27 @@ function App() {
                 theme={theme}
                 onToggleTheme={toggleTheme}
             />
+            {page === 'user-stats-list' && (
+                <div className="navbar-archive">
+                    <button
+                        className={`btn-secondary btn-archive ${showArchived ? 'btn-archive-active' : ''}`}
+                        onClick={() => setShowArchived(v => !v)}
+                    >
+                        {showArchived ? '← Текущие' : '🗄 Архив'}
+                    </button>
+                </div>
+            )}
             <div className="app-root">
                 {page === 'login' && (
                     <LoginPage onLogin={() => setPage('users')} />
                 )}
                 {page === 'users' && (
-                    <UsersPage onUser={user => { setUser(user); setPage('user-stats-list') }} />
+                    <UsersPage onUser={user => { setUser(user); setShowArchived(false); setPage('user-stats-list') }} />
                 )}
                 {page === 'user-stats-list' && (
                     <UserStatsListPage
                         user={selectedUser}
+                        showArchived={showArchived}
                         onSelectStat={stat => { setStat(stat); setPage('user-detail') }}
                     />
                 )}
